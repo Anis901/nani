@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🏔️ Hiking Adventure Trips</title>
+<style>
+  :root{
+    --bg: linear-gradient(135deg,#a8edea,#fed6e3);
+    --card:#ffffff; --text:#0f172a; --muted:#475569;
+    --accent:#0ea5e9; --accent2:#10b981; --warn:#f59e0b; --err:#ef4444; --ok:#16a34a;
+    --border:#e5e7eb;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: 'Poppins',sans-serif;
+    min-height:100vh; background:var(--bg); color:var(--text);
+    display:grid; place-items:center; padding:24px;
+  }
+  .wrapper{
+    width:min(900px,95vw); background:var(--card); border-radius:20px; padding:28px;
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+  }
+  h1{margin:0 0 6px; font-size:1.8rem; text-align:center; color:#2563eb;}
+  p.sub{margin:0 0 18px; color:var(--muted); text-align:center;}
+  .grid{display:grid; gap:14px}
+  @media(min-width:720px){ .grid.two{grid-template-columns:1fr 1fr} }
+  label{font-size:.9rem; color:var(--muted); display:block; margin-bottom:6px}
+  select,input[type="number"]{
+    width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; outline:none;
+    background:#fff; font-size:1rem;
+  }
+  .box{
+    border:1px solid var(--border); border-radius:14px; padding:16px; background:#fafafa;
+  }
+  .trip{
+    border-radius:12px; background:linear-gradient(135deg,#fbc2eb,#a6c1ee); color:#fff;
+    padding:14px; margin-bottom:10px; box-shadow:0 3px 6px rgba(0,0,0,0.2);
+  }
+  .trip h3{margin:0; font-size:1.1rem}
+  .badge{display:inline-block;margin:4px;padding:6px 10px;border-radius:20px;font-size:.8rem;background:#fff;color:#333;}
+  .actions{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
+  button{
+    appearance:none; border:0; padding:12px 14px; border-radius:10px; cursor:pointer;
+    color:#fff; font-weight:600; background:var(--accent); transition:transform .02s ease, filter .15s;
+  }
+  button.secondary{background:#64748b}
+  button.success{background:var(--accent2)}
+  button:active{transform:translateY(1px)}
+  button:hover{filter:brightness(1.05)}
+  .result{
+    margin-top:14px; padding:14px; border:1px dashed var(--border); border-radius:12px;
+    background:#ffffff; display:grid; gap:6px;
+  }
+  .ok{color:var(--ok)}
+  .warn{color:var(--warn)}
+  .err{color:var(--err)}
+  .terms{
+    display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+    border:1px solid var(--border); border-radius:12px; padding:10px; background:#f0f9ff;
+  }
+  .footer{margin-top:10px; font-size:.85rem; color:var(--muted); text-align:center;}
+</style>
+</head>
+<body>
+  <main class="wrapper" role="main">
+    <h1>🏔️ Hiking Adventure Trips</h1>
+    <p class="sub">Choose your mountain adventure. Fee: <strong>RM250/pax</strong>. Includes: management, fee, food.</p>
+
+    <div class="trip">
+      <h3>🗻 Mountain Kinabalu — 13 October 2025</h3>
+      <span class="badge">Fee: RM250/pax</span>
+      <span class="badge">Includes: management, fee, food</span>
+      <span class="badge" id="seatLabel-kinabalu">Seats: 30</span>
+    </div>
+
+    <div class="trip">
+      <h3>🏞️ Mountain Nuang — 13 November 2025</h3>
+      <span class="badge">Fee: RM250/pax</span>
+      <span class="badge">Includes: management, fee, food</span>
+      <span class="badge" id="seatLabel-nuang">Seats: 30</span>
+    </div>
+
+    <div class="trip">
+      <h3>⛰️ Mountain Gunung Besar Hantu — 13 December 2025</h3>
+      <span class="badge">Fee: RM250/pax</span>
+      <span class="badge">Includes: management, fee, food</span>
+      <span class="badge" id="seatLabel-gbh">Seats: 30</span>
+    </div>
+
+    <div class="box grid two">
+      <div>
+        <label for="trip">Select Mountain</label>
+        <select id="trip">
+          <option value="kinabalu">Mountain Kinabalu — 13 Oct 2025</option>
+          <option value="nuang">Mountain Nuang — 13 Nov 2025</option>
+          <option value="gbh">Mountain Gunung Besar Hantu — 13 Dec 2025</option>
+        </select>
+      </div>
+      <div>
+        <label for="pax">Number of Pax</label>
+        <input type="number" id="pax" min="1" value="1">
+      </div>
+    </div>
+
+    <div class="terms" style="margin-top:14px;">
+      <strong>Accept Terms & Conditions?</strong>
+      <label><input type="radio" name="tnc" value="yes"> Yes</label>
+      <label><input type="radio" name="tnc" value="no" checked> No</label>
+    </div>
+
+    <div class="actions" style="margin-top:16px;">
+      <button id="checkBtn" type="button">Check Available Seat</button>
+      <button id="bookBtn" type="button" class="success">Confirm Booking</button>
+    </div>
+
+    <div id="availability" class="result" style="display:none;"></div>
+    <div id="result" class="result" style="display:none;"></div>
+    <div class="footer">© 2025 Hiking Adventure Malaysia</div>
+  </main>
+
+<script>
+const PRICE = 250;
+const trips = {
+  kinabalu:{name:'Mountain Kinabalu', date:'13 October 2025', seats:30, label:'seatLabel-kinabalu'},
+  nuang:{name:'Mountain Nuang', date:'13 November 2025', seats:30, label:'seatLabel-nuang'},
+  gbh:{name:'Mountain Gunung Besar Hantu', date:'13 December 2025', seats:30, label:'seatLabel-gbh'}
+};
+function refreshSeats(){
+  for(let t of Object.values(trips)){
+    document.getElementById(t.label).textContent = `Seats: ${t.seats}`;
+  }
+}
+refreshSeats();
+
+document.getElementById('checkBtn').addEventListener('click',()=>{
+  const trip=document.getElementById('trip').value;
+  const pax=parseInt(document.getElementById('pax').value);
+  const t=trips[trip];
+  const box=document.getElementById('availability');
+  box.style.display='grid';
+  if(pax<=t.seats){
+    box.innerHTML=`<div class="ok">✅ ${t.name} — ${t.date}</div><div>${pax} seat(s) available. Total fee: RM${(pax*PRICE).toFixed(2)}</div>`;
+  }else{
+    box.innerHTML=`<div class="err">❌ Only ${t.seats} seat(s) left. Please reduce pax or choose another trip.</div>`;
+  }
+});
+
+document.getElementById('bookBtn').addEventListener('click',()=>{
+  const trip=document.getElementById('trip').value;
+  const pax=parseInt(document.getElementById('pax').value);
+  const t=trips[trip];
+  const tnc=document.querySelector('input[name="tnc"]:checked').value;
+  const res=document.getElementById('result');
+  res.style.display='grid';
+  if(tnc!=='yes'){res.innerHTML='<div class="err">⚠️ Please accept Terms & Conditions first.</div>';return;}
+  if(pax>t.seats){res.innerHTML='<div class="err">❌ Not enough seats available.</div>';return;}
+  t.seats-=pax; refreshSeats();
+  res.innerHTML=`<div class="ok">🎉 Booking confirmed!</div><div>Trip: ${t.name} — ${t.date}</div><div>Pax: ${pax}</div><div>Total: RM${(pax*PRICE).toFixed(2)}</div><div>Includes: management, fee, food.</div>`;
+});
+</script>
+</body>
+</html>
